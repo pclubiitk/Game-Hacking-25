@@ -58,3 +58,61 @@ Now use the ```next``` command that will single step out of the main function an
 ```
 picoCTF{307019}
 ```
+
+### 3. <a href="https://play.picoctf.org/practice/challenge/397?category=3&page=1&search=GDB">GDB baby step 3 - picoCTF challenge 397</a>
+![image](https://github.com/user-attachments/assets/29afb2e8-06f7-4d3c-ae34-dc6fdc3905b5)
+
+The challenge provides us with a file ```debugger0_c```. In similar fashion to the previous two problems, we proceed to use ```gdb```.
+
+```
+$ sudo chmod +777 debugger0_c
+$ sudo gdb ./debugger0_c
+```
+```
+(gdb) lay next
+(gdb) break main
+Breakpoint 1 at 0x40110e
+(gdb) run
+Starting program: debugger0_c
+...
+Breakpoint 1 at 0x000000000040110e in main()
+(gdb) nexti
+0x0000000000401111 in main()
+(gdb) nexti
+0x0000000000401115 in main()
+(gdb) nexti
+0x000000000040111c in main()
+(gdb) x/4xb $rbp-4
+0x7fffffffe29c: 0x6b 0xc9 0x62 0x22
+(gdb)
+```
+
+Thus we find the final flag to be:
+```
+picoCTF{0x6bc96222}
+```
+### 4. <a href = "https://play.picoctf.org/practice/challenge/398?category=3&page=1&search=GDB">GDB baby step 4 - picoCTF challenge 398</a>
+
+![image](https://github.com/user-attachments/assets/ce7af193-3334-4f81-9fa1-ba775700dff8)
+
+The challenge provides us with a file ```debugger0_d```. In similar fashion to the previous two problems, we proceed to use ```gdb```.
+
+```
+$ sudo chmod +777 debugger0_c
+$ sudo gdb ./debugger0_c
+```
+Don't forget to hit return three times to show assembly code as well as register values in GDB.
+![image](https://github.com/user-attachments/assets/76f0de8a-3536-4ebe-9785-7db1be7d3314)
+
+As usual, we set breakpoint at main using ```b main``` and then ```run``` the program. Now we move instruction by instruction using ```nexti``` until we reach the ```0x401140``` instruction pointer. We see that at this point, ```eax``` holds the value ```654```.
+![image](https://github.com/user-attachments/assets/cc9f588b-b4c6-4f13-9941-6239f1cfd5a6)
+
+Now we move the instruction pointer to ```0x401147```, where we notice that the ```eax``` pointer now holds the value ```8439870```, and thus we find the constant to be ```12905```.
+![image](https://github.com/user-attachments/assets/aec42db8-e3d4-4b7b-807e-2ce09b5434b3)
+
+
+Thus, the final flag is:
+
+```
+picoCTF{12905}
+```
