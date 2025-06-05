@@ -116,3 +116,75 @@ Thus, the final flag is:
 ```
 picoCTF{12905}
 ```
+
+## Reversing - crackmes
+
+### 1. <a href="https://crackmes.one/crackme/5da31ebc33c5d46f00e2c661">ezman's easy keyg3nme</a>
+
+<div align="center">
+  <em>A screenshot of the challenge</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/f6568216-9b41-4a72-95ca-5a5adb6c5ddd)
+
+Let's go ahead and download the file listed in the challenge. We obtain a `zip` file which is password-protected. The password is `crackmes.one`. We then get the file `keyg3nme`. Now open up your favorite disassembler (mine is IDA by Hex-Rays) and load this file.
+
+<div align="center">
+<em>This is what it should look like</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/9ebb6294-576d-4d1b-a9cf-860943e18fc6)
+
+Now press the `F5` key to open the pseudocode view. We notice the `validate_key` function in the `main` function. Double click on the `validate_key` label to see its contents.
+
+<div align="center">
+<em>Contents of the `validate_key` function</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/de0980d0-d751-49fa-8716-049456134ccd)
+
+As we can see, the funciton will only validate our key if it is divisible by 1223. Thus, we can run the file and enter any multiple of 1223, and surely enough, our key is validated.
+
+<div align="center">
+<em>Not so impressive, right?</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/61ce4a61-bca9-430a-9c8f-ed64a8715df3)
+
+### 2. <a href="https://crackmes.one/crackme/5c1a939633c5d41e58e005d1">cbm-hackers's jumpjumpjump</a>
+
+<div align="center">
+<em>A screenshot of the challenge</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/852dcbdd-fac7-4a25-9495-b7813d9d1975)
+
+Just like last time, we download the `zip` folder and extract the `rev03` file inside using the password `crackmes.one`, and load the file `rev03` in our favorite disassembler. Press `F5` to generate and open pseudocode view of the `main` function.
+
+<div align="center">
+<em>This is what the pseudocode should look like</em>
+</div>
+
+![image](https://github.com/user-attachments/assets/aefafef2-1b66-4302-a8d2-3b8ac011d5a5)
+
+From here, we can easily infer that the function first checks the input size, and if it is any longer than 11 characters, the flag is not displayed. Then, we need to make sure that the ASCII values of the characters in our string add up to 1000 as is dictated by the flow of the program's logic. Let's take a look at the ASCII table then.
+
+![image](https://github.com/user-attachments/assets/050e9ad4-77f6-4cd4-b19c-cffcd83994ff)
+
+We see that `d` has the value 100. So we can use 10 d's to input as the key, right? Let's see!
+
+![image](https://github.com/user-attachments/assets/8b356775-7667-4de3-a27e-a4cedf263f8b)
+
+Oh no! This doesn't seem to work at all! Why could that be? This is why: since we are using the carriage return to return the input back to the program, the program also registers a  newline character (`'\n'` ) at the end of our input, which corresponds to the value 10. To account for that, we use 10 c's as the program's input.
+
+![image](https://github.com/user-attachments/assets/4454888c-6e6d-4df7-847a-59dc4686c8fc)
+
+Input:
+```
+cccccccccc
+```
+
+Output:
+```
+flag is flag{!#&*/5<DMW}
+```
