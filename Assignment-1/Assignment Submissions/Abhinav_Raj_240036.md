@@ -90,3 +90,24 @@ print(main())
 307019
 ```
 **FLAG:** picoCTF{307019}
+---
+## GDB baby step 3:
+**Challenge:**  
+Description  
+Now for something a little different. 0x2262c96b is loaded into memory in the main function. Examine byte-wise the memory that the constant is loaded in by using the GDB command x/4xb addr. The flag is the four bytes as they are stored in memory. If you find the bytes 0x11 0x22 0x33 0x44 in the memory location, your flag would be: picoCTF{0x11223344}.
+
+**Solve:**  
+Open the file in gdb:
+```$ gdb ./debugger0_c```  
+Info func  
+disass main  
+b main  
+r  
+b *0x40111f  
+c  
+```
+gef➤  x/4xb $rbp-4
+0x7fffffffdd7c:	0x6b	0xc9	0x62	0x22
+```
+
+b 
