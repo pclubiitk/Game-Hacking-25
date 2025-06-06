@@ -35,7 +35,7 @@ Dump of assembler code for function main:
    0x000000000000113e <+21>:	ret
 End of assembler dump.
 ```
-This shows value stored in eax register ``` 0x0000000000001138 <+15>:	mov    eax,0x86342```
+This shows value stored in eax register ``` 0x0000000000001138 <+15>:	mov    eax,0x86342```  
 Its decimal is:
 ```
 gef➤  p /d 0x86342
