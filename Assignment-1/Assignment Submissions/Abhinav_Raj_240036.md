@@ -268,4 +268,81 @@ Good job mate, now go keygen me.
 
 ---
 ## cbm-hackers's jumpjumpjump:
+Downloaded the zip and extracted the file.  
+```
+$ file rev03
+rev03: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=9d23fcc7b9cf9c42f809d46f50ccc249de567cc6, not stripped
+```
+A non stripped 64-bit executable.  
+```
+$ ./rev03 
+enter the magic string
+ad
+wrong string
+No flag for you.
+```
+Loaded the file in ghidra. opened the main:
+```
 
+undefined8 main(void)
+
+{
+  size_t sVar1;
+  ulong uVar2;
+  char local_98 [112];
+  long local_28;
+  int local_20;
+  int local_1c;
+  
+  local_1c = 0;
+  puts("enter the magic string");
+  fgets(local_98,100,stdin);
+  sVar1 = strlen(local_98);
+  if (sVar1 < 0xc) {
+    local_20 = 0;
+    while( true ) {
+      uVar2 = (ulong)local_20;
+      sVar1 = strlen(local_98);
+      if (sVar1 <= uVar2) break;
+      local_1c = local_1c + local_98[local_20];
+      local_20 = local_20 + 1;
+    }
+    if (local_1c == 1000) {
+      local_28 = strcat_str();
+      printf("flag is flag{");
+      for (local_20 = 0; local_20 < 10; local_20 = local_20 + 1) {
+        putchar((int)*(char *)(local_28 + local_20));
+      }
+      puts("}");
+    }
+    else {
+      puts("wrong string\nNo flag for you.");
+    }
+  }
+  else {
+    puts("too long...sorry no flag for you!!!");
+  }
+  return 0;
+}
+```
+We see that the program asks for a string which should be less than 12 characters long:  
+```if (sVar1 < 0xc) {```  
+Then it calculates the sum of ASCII values of the string and checks if its equal to `1000`  
+Then calls a function ```strcat_str()``` to give the flag and then prints it.  
+  
+So if we think of ASCII 100 that is 'd', so we can  enter is 10 times and get the flag. But it came out wrong. read about fgets to see that it also includes new line character `\n` that has an ASCII value `10`.  
+
+So, we have to enter a string with sum of  ASCII `990` so that `990+10` is 1000.  
+So, the natural choice is  character with ASCII `99` x 10 =990, i.e., `c`  
+
+So, the string is `cccccccccc`  
+Entered and got the flag:
+```
+$ ./rev03 
+enter the magic string
+cccccccccc
+flag is flag{!#&*/5<DMW}
+```
+
+**Flag:** flag{!#&*/5<DMW}
+---
