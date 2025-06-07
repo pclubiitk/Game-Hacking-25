@@ -209,4 +209,63 @@ $1 = 12905
 ---
 
 # Reversing - Crackmes
-##
+## ezman's easy keyg3nme:
+Downloaded the zip file.  
+Used password: crackmes.one.  
+Ran the file and entered a value:
+```
+$ ./keyg3nme 
+Enter your key:  k
+nope.
+```
+So we have to input a key. We have to get the logic to crack the password validation.  
+Loaded the file in Ghidra.  
+Opened the main function:
+```
+undefined8 main(void)
+
+{
+  int iVar1;
+  long in_FS_OFFSET;
+  undefined4 local_14;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  printf("Enter your key:  ");
+  __isoc99_scanf(&DAT_0010201a,&local_14);
+  iVar1 = validate_key(local_14);
+  if (iVar1 == 1) {
+    puts("Good job mate, now go keygen me.");
+  }
+  else {
+    puts("nope.");
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+So we see that main function takes an input and then calls a funtion ```validate_key``` and passes the input to it.  
+If the value returned by validate_key funtion is 1 then we pass the validation else we fail.  
+Opened the validate_key funtion:
+```
+bool validate_key(int param_1)
+
+{
+  return param_1 % 0x4c7 == 0;
+}
+```
+The function accepts an integer input and outputs boolean.  
+We see if the input number is divisible by ```0x4c7``` that is ```1223``` in decimal. Then it passes the chech and return ```True``` or 1.  
+So, entered 1223 in the challege, and boom.
+```
+$ ./keyg3nme 
+Enter your key:  1223
+Good job mate, now go keygen me.
+```
+
+---
+## cbm-hackers's jumpjumpjump:
+
