@@ -27,7 +27,86 @@ key: 1223<br>
 weird flag. analysing the code on ghidra, the first condition is that the length should be less than 12. In the snippet, local_20 is just the counter for each digit of the input string. Second condition is that sum of the input characters should be equal to 1000.<br>
 So I copied the code, and printed out the local_1c value everytime according to my input. Final input: `qwertyuiT`. `qwertyui` made up to 916 and T's value is 84. This was the last check and entering this we would get the flag.<br>
 flag is flag{!#&*/5<DMW}
+
 ### Password Login 2
+
+### login-cipher
+analysing in ghidra, there were mainly 4 imp functions. What was happening was there are a bunch of encrypted string literals inside the binary and these were being decrypted to output the msgs. <br>
+the main fxn was `FUN_001012a1` which called the check fxn `FUN_001013e3` and the output msgs were decrypted by calling to `FUN_00101348` which called the decrypting function `FUN_00101218`.<br>
+```
+char * FUN_00101218(char *param_1)
+{
+  int local_14;
+  char *local_10;
+  local_14 = 0x7b1; // 1969
+  for (local_10 = param_1; *local_10 != '\0'; local_10 = local_10 + 1) {
+    local_14 = (local_14 * 7) % 0x10000; // 65536
+    *local_10 = *local_10 + ((char)(local_14 / 10) * 10 - (char)local_14);
+  }
+  return param_1;
+}
+```
+<br>``
+This is an excerpt from the main fxn:<br>
+```
+uVar1 = FUN_001013e3("%64[^\n]","fhz4yhx|~g=5");
+if ((int)uVar1 == 0) {
+  FUN_00101348("Ftyynjy*",'\x01');
+}
+else {
+  FUN_00101348("Zwvup(",'\x01');
+}
+```
+<br>``
+So, using the decrypting function `FUN_00101218` I wrote another fxn to decrypt the strings.<br>
+```
+int main() {
+    int local_14;
+    char *local_10;
+    char *trial = "fhz4yhx|~g=5";
+    char *param_1 = malloc(strlen(trial)+1);
+    strcpy(param_1, trial);
+    local_14 = 0x7b1; // 1969
+    for (local_10 = param_1; *local_10 != '\0'; local_10++) {
+        local_14 = (local_14 * 7) % 0x10000;
+        *local_10 = *local_10 + ((char)(local_14 / 10) * 10 - (char)local_14);
+    }
+    printf("%s\n", param_1);
+    free(param_1);
+    return 0;
+}
+```
+<br>Decrypting the 2nd string in 13e3 fxn call `"fhz4yhx|~g=5"`, we found the pwd: `ccs-passwd44`.<br>
+![image](https://github.com/user-attachments/assets/5e224c21-7569-43de-9bb7-c3222b18df1b)
+
+### iso_32
+open it in gdb. `info func` reveals `__f_func` and `__s_func`. disassemble them. we need to reach the `__s_func` fxn. break at the last `ret` instruction of `__f_func`. enter a value and then search for it using `search-pattern <value>`. use `i f` to find the address of eip. find the offset between the variable in which the entered value is being scanned into and eip. it comes out to be 44. then we write a simple buffer overflow script.<br>
+![image](https://github.com/user-attachments/assets/0c2f9b0a-c6d6-4384-bbf9-f0fbdbf95033)
+![image](https://github.com/user-attachments/assets/da753dfe-ca66-4da0-97e0-ca2bb08c5a7f)<br>
+```
+from pwn import *
+
+target = process('./crackme')
+
+payload = b""
+payload += b"0"*44 
+payload += p32(0x8049182)  
+target.sendline(payload)
+
+target.interactive()
+```
+<br>
+
+![image](https://github.com/user-attachments/assets/7f7529ef-0584-4b31-8ca1-032f8543bc5b)
+
+ 
+
+
+
+  
+
+
+
 
 
 
