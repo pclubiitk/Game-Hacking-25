@@ -2,7 +2,8 @@
 
 ## (I) GDB picoCTF tasks 
 
-#Task 1: GDB Baby step 1
+# Task 1: GDB Baby step 1
+
 Task was to find the contents of the eax register at the end of main. 
 Here is the photo of disassembled main.
 
@@ -13,42 +14,43 @@ Second last command shows moving 0x86342 into $eax register. If directly run, ma
 This stops the flow at 0x0000555555555131 in main. Stepping until the command just after moving into $eax lets us examine the register.
 
 A simple _print/d $eax_ gives the contents of eax in decimal form.
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image2.png)
+![All text](images/image2.png)
 
 
-#Task 2: GDB baby step 2
+# Task 2: GDB baby step 2
+
 Task is to find the contents of the eax register inside main. 
 The disassembled main is as follows:
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image3.png)
+![All text](images/image3.png)
 
 Disass of main shows a set of calculations being carried out. 
 1. We can calculate the contents of eax ourselves.
 2. We set a breakpoint just after the contents being moved into eax register and then use the command _info register eax_. 
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image4.png)
+![All text](images/image4.png)
 
-#Task 3: GDB baby step 3
+# Task 3: GDB baby step 3
 Task is to find byte-wise the memory that the constant 0x2262c96b is loaded. 
 Disassembled main is as follows:
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image5.png)
+![All text](images/image5.png)
 
 The constant is loaded  into the memory at the address 0x0000000000401115. It would be wise to place a break point just after this to examine the register into which it is moved.
 Run the main function. Upon reaching the breakpoint, step once to load the contents. 
 Use the command _x/4xb $rbp-4_ to find the order of the bytes that was loaded. 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image6.png)
+![All text](images/image6.png)
 
 The contents of $rbp-4 shows big endianness. Printing the outputs of $eax will not give this output as the endianness characteristics is not followed. 
 
-#Task 4 : GDB baby step 4
+# Task 4 : GDB baby step 4
 Task is to find the constant by which register $eax is multiplied.
 Disassembled main is as follows:
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image7.png)
+![All text](images/image7.png)
 
 Main shows a function being called in memory address 0x0000000000401142. According to the hint, a function can be referenced by either its name or its starting address in gdb. Starting address is given as 0x401106.
 
 Disassembled function is as follows:
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image8.png)
+![All text](images/image8.png)
 
 We can see the command imul where the constant $0x3269 is multiplied to $eax. Required constant is hence 12905, the decimal form of 0x3269.
 
@@ -59,20 +61,20 @@ We can see the command imul where the constant $0x3269 is multiplied to $eax. Re
 Upon running the keyg3nme binary, we observe that it is asking for a key. Task is to find this key.
 Using ghidra, we disassemble this binary file.
 Under the list of functions, we see the main function
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image9.png)
+![All text](images/image9.png)
 
 Inside the main, we see the use of another function _validate string_. Upon further investigation of the function _validate string_, we see the following:
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image10.png)
+![All text](images/image10.png)
 
 Hence, the key is decimal form of 0x4c7, which is 1223
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image11.png)
+![All text](images/image11.png)
 
 # Task 2 : cbm-hackers's jumpjumpjump
 Disassembling the binary file ./rev03, shows us the main function
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image12.png)
+![All text](images/image12.png)
 
 The main function tells us how to get the fail. It first, takes input of a string, acStack_98 and it also stores the length of the string in sVar1. 
 The if condition proceeds only if sVar1 is less than 0xc, which is 12, indicating that our _magic string is of length less than 12_. 
@@ -85,7 +87,7 @@ Hence, dddddddddd should work, as ord(d) = 100, character sum of dddddddddd = 10
 To avoid newline character being considered, we enter
 echo -n dddddddddd | ./rev03.
 
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image13.png)
+![All text](images/image13.png)
 
 
 # Task 3 : Loz's Password Login 2
@@ -108,7 +110,7 @@ This shows that the each char of the string is being encoded by XOR'ing it with 
 I then moved on to another function of the password class. 
 There it was clear that the string being encoded is "x_.1:.-8.4.p6-e.!-" and the key is 0x42, which is 66 or char 'B'. 
 Reverse encoding of the above string gives following
-![All text](/home/ton168/GH-Assignments/Game-Hacking-25/Assignment-1/Assignment Submissions/images/image14.png) 
+![All text](images/image14.png) 
 
 Above was done with the python file, xor_decoding.py.
 But, the above does not seem to be the password. 
