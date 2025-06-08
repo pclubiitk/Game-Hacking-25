@@ -56,4 +56,25 @@ This challenge also contains ``` ELF 64-bit LSB pie executable```
 4. Those values are `654` and `8439870`. On division we get our required constant `12905`.
 5. Hence, flag is ``` picoCTF{12905} ```.
 
+## Challenge: 5 {ezman's easy keyg3nme}
+(unzip the zip file by password ```crackmes.one```)
+
+This challenge also contains ``` ELF 64-bit LSB pie executable```, which ask for key to solve it.
+1. Run it in ghidra. Open main function.
+   
+![Screenshot From 2025-06-08 19-41-02](https://github.com/user-attachments/assets/51c6c765-ce01-451b-8084-bd43974c572b)
+
+2. ```main``` function pass user input to ```validate key```, which check if it dived by ```0x4c7```, which is in hex. on converting it ti decimal, number is ```1223```.
+
+![Screenshot From 2025-06-08 19-41-37](https://github.com/user-attachments/assets/7be123bf-8f7a-43f1-8f86-05c33c36d657)
+
+3. So, basically any input that is multiple of 1223, is key.
+
+4. We got: 
+``` 
+chirag@hp:~/Downloads$ ./keyg3nme 
+Enter your key:  1223
+Good job mate, now go keygen me.
+```
+
 
