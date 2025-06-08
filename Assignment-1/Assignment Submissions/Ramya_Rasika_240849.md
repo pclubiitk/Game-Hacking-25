@@ -14,6 +14,7 @@ Second last command shows moving 0x86342 into $eax register. If directly run, ma
 This stops the flow at 0x0000555555555131 in main. Stepping until the command just after moving into $eax lets us examine the register.
 
 A simple _print/d $eax_ gives the contents of eax in decimal form.
+
 ![All text](images/image2.png)
 
 
@@ -21,6 +22,7 @@ A simple _print/d $eax_ gives the contents of eax in decimal form.
 
 Task is to find the contents of the eax register inside main. 
 The disassembled main is as follows:
+
 ![All text](images/image3.png)
 
 Disass of main shows a set of calculations being carried out. 
@@ -32,11 +34,13 @@ Disass of main shows a set of calculations being carried out.
 # Task 3: GDB baby step 3
 Task is to find byte-wise the memory that the constant 0x2262c96b is loaded. 
 Disassembled main is as follows:
+
 ![All text](images/image5.png)
 
 The constant is loaded  into the memory at the address 0x0000000000401115. It would be wise to place a break point just after this to examine the register into which it is moved.
 Run the main function. Upon reaching the breakpoint, step once to load the contents. 
 Use the command _x/4xb $rbp-4_ to find the order of the bytes that was loaded. 
+
 ![All text](images/image6.png)
 
 The contents of $rbp-4 shows big endianness. Printing the outputs of $eax will not give this output as the endianness characteristics is not followed. 
@@ -50,7 +54,9 @@ Disassembled main is as follows:
 Main shows a function being called in memory address 0x0000000000401142. According to the hint, a function can be referenced by either its name or its starting address in gdb. Starting address is given as 0x401106.
 
 Disassembled function is as follows:
+
 ![All text](images/image8.png)
+
 
 We can see the command imul where the constant $0x3269 is multiplied to $eax. Required constant is hence 12905, the decimal form of 0x3269.
 
@@ -61,6 +67,7 @@ We can see the command imul where the constant $0x3269 is multiplied to $eax. Re
 Upon running the keyg3nme binary, we observe that it is asking for a key. Task is to find this key.
 Using ghidra, we disassemble this binary file.
 Under the list of functions, we see the main function
+
 ![All text](images/image9.png)
 
 Inside the main, we see the use of another function _validate string_. Upon further investigation of the function _validate string_, we see the following:
