@@ -1,1 +1,1 @@
-The Writeup.odt file contains the writeups for challenges.
+writeups_pdf contains the writeups for challenges
