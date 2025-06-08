@@ -641,3 +641,124 @@ Insert your password: ccs-passwd44
 Correct!
 ```
 Bingo!
+
+---
+## math__0x0's iso_32:
+File shows its a 32 bit LSB executable
+```
+$ file crackme
+crackme: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=a10d6ed49f272c25271e1942ff8e2b7ce6a80a34, for GNU/Linux 3.2.0, not stripped
+```
+Run the file:
+```
+$ ./crackme
+enter the password:sfd
+Ooop!! Try again
+``` 
+Opened it in ghidra. The main function was calling two functions, f and __f_func:
+```
+undefined4 main(void)
+
+{
+  f();
+  __f_func();
+  return 0;
+}
+```
+Opened them:
+```
+
+void f(void)
+
+{
+  undefined1 local_2c [36];
+  
+  printf("enter the password:");
+  __isoc99_scanf(&DAT_0804a036,local_2c);
+  return;
+}
+```
+and
+```
+void __f_func(void)
+
+{
+  puts("Ooop!! Try again");
+  return;
+}
+```
+So we are getting into the f function that asks for input then are directly redirected to another function that prints we are out.
+So its a buffer overflow challenge.
+There is another funtion that prints `Great`:
+```
+void __s_func(void)
+
+{
+  puts("Great !!");
+  return;
+}
+```
+Opened in gdb, and entered a huge input:
+```
+gef➤  r
+Starting program: /home/abhinavraj/Downloads/crackme/crackme 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+enter the password:aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz
+```
+Got the overflow:
+```
+[ Legend: Modified register | Code | Heap | Stack | String ]
+─────────────────────────────────────────────────────────────────────────────── registers ────
+$eax   : 0x1       
+$ebx   : 0x74747373 ("sstt"?)
+$ecx   : 0x0       
+$edx   : 0xf7fc24c0  →  0xf7fc24c0  →  [loop detected]
+$esp   : 0xffffcf60  →  "yyzz"
+$ebp   : 0x76767575 ("uuvv"?)
+$esi   : 0x08049240  →  <__libc_csu_init+0000> push ebp
+$edi   : 0xf7ffcb60  →  0x00000000
+$eip   : 0x78787777 ("wwxx"?)
+$eflags: [zero carry PARITY adjust SIGN trap INTERRUPT direction overflow RESUME virtualx86 identification]
+$cs: 0x23 $ss: 0x2b $ds: 0x2b $es: 0x2b $fs: 0x00 $gs: 0x63 
+─────────────────────────────────────────────────────────────────────────────────── stack ────
+0xffffcf60│+0x0000: "yyzz"	 ← $esp
+0xffffcf64│+0x0004: 0x00000000
+0xffffcf68│+0x0008: 0x00000000
+0xffffcf6c│+0x000c: 0xf7da1c75  →   add esp, 0x10
+0xffffcf70│+0x0010: 0x00000001
+0xffffcf74│+0x0014: 0xffffd024  →  0xffffd1d5  →  "/home/abhinavraj/Downloads/crackme/crackme"
+0xffffcf78│+0x0018: 0xffffd02c  →  0xffffd200  →  "SHELL=/bin/bash"
+0xffffcf7c│+0x001c: 0xffffcf90  →  0xf7fa5e34  →  0x00228d2c
+───────────────────────────────────────────────────────────────────────────── code:x86:32 ────
+[!] Cannot disassemble from $PC
+[!] Cannot access memory at address 0x78787777
+───────────────────────────────────────────────────────────────────────────────── threads ────
+[#0] Id 1, Name: "crackme", stopped 0x78787777 in ?? (), reason: SIGSEGV
+─────────────────────────────────────────────────────────────────────────────────── trace ────
+
+```
+So the overflow occurs after 44 ofsets.
+Got the address of the `__s_func` from ghidra `08049182`. Then used pwntool to send the payload:
+
+```
+(pwnenv) abhinavraj@abhinavraj-ASUS:~/Downloads/crackme$ python3
+Python 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from pwn import*
+>>> target=process('./crackme')
+[x] Starting local process './crackme'
+[+] Starting local process './crackme': pid 26515
+>>> payload=flat("a"*44,p32(0x08049182))
+<stdin>:1: BytesWarning: Text is not bytes; assuming ASCII, no guarantees. See https://docs.pwntools.com/#bytes
+>>> target.sendline(payload)
+>>> target.interactive()
+[*] Switching to interactive mode
+[*] Process './crackme' stopped with exit code -11 (SIGSEGV) (pid 26515)
+enter the password:Great !!
+[*] Got EOF while reading in interactive
+```
+
+And Done!
+
+---
