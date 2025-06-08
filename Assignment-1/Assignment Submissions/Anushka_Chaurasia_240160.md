@@ -142,6 +142,9 @@ p/d 0x3269
 '5' - 1 = '4'
 ```
 - Hence, now
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/21.jpg)
+
+- 
 - ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/18.jpg)
 
 
