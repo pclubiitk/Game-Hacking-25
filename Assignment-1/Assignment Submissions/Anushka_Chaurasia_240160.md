@@ -104,3 +104,48 @@ p/d 0x3269
 - The function stores input using fgets(local_98, 100, stdin). Then, it measures the length of the string with strlen. If the string is shorter than 12 bytes (if (sVar1 < 0xc)), it proceeds.
 - From the function it seems like that any string with less than 12 characters and ascii sum equal to 1000 satisfies as a magic string. However, there seems to be a catch in the function logic due to input taken using fgets function, which automatically adds next line character (\n) if there is room.
 - Since, \n has ascii value 10, the total ascii sum for the string to be correct becomes 990. Hence, any string with less than 12 characters and ascii sum as 990 is a magic string.
+# Crackme 4
+## For this one, just like any other crackme first downloaded the file. 
+- Then, on running it, it asked for a password, that I entered and it was obviously incorrect. So, I switched to ghidra. - On analysing the elf, it had some weird looking strings. Ofcourse, I tried entering those strings as password, but none of them was correct.
+- I had to refer to the writeup in order to understand what exactly was the logic to figure out the password. It was found out that "Gtu.}'uj{fq!p{$" is "Don't patch it!" and "Lszl{{%\x82vx{!whvt|twg?%" is "Insert your password: "
+- So, "fhz4yhx|~g=5" is password. 
+- Figuring out the ascii difference between strings "Gtu.}'uj{fq!p{$" and "Don't patch it!", 
+```
+'G'-'D' = 3
+'t'-'o' = 5
+'u'-'n' = 7
+'.'-''' = 7
+'}'-'t' = 9
+'u'-'p' = 5
+'j'-'a' = 9
+'{'-'t' = 7
+'f'-'c' = 3
+'q'-'h' = 9
+'!'-' ' = 1
+'p'-'i' = 7
+'{'-'t' = 7
+'$'-'!' = 3
+```
+- So, for the password,
+```
+'f' - 3 = 'c'
+'h' - 5 = 'c'
+'z' - 7 = 's'
+'4' - 7 = '-'
+'y' - 9 = 'p'
+'h' - 7 = 'a'
+'x' - 5 = 's'
+'|' - 9 = 's'
+'~' - 7 = 'w'
+'g' - 3 = 'd'
+'=' - 9 = '4'
+'5' - 1 = '4'
+```
+- Hence, now
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/18.jpg)
+
+
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/19.jpg)
+
+
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/20.jpg)
