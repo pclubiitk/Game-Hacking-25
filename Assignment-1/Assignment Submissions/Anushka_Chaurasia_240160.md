@@ -86,20 +86,20 @@ p/d 0x3269
 ## For this crackme,  ghidra is used.
 - I first downloaded the zip file and unzipped it which gave a binary elf file keyg3nme. 
 - Running this file, it asked for a key, we were supposed to find out the key validation logic for this key.
-![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/13.jpg)
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/13.jpg)
 - Proceeding, I imported the file in ghidra and let ghidra analyse it.
 - Figuring out the main function from the the list of functions that ghidra displayed after analysing the file, I found out the main function which looked like this.
-![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/14.jpg)
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/14.jpg)
 - In order to validate the key, it was calling a function validate_key, Hence the next step was to understand what this function was doing.
-![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/15.jpg)
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/15.jpg)
 - It was performing a complex mathematical operation, which was ultimately trying to check if the key entred is divisible by 1223. Figuring out what this complicated mathematical expression meant entirely on my own was not an easy task, so I took some help of AI.
 - It made me figure out that (int)((long)param_1 * 0x1acb0dad >> 0x27) This is an optimized way to do integer division by 1223.
 # Crackme 2
 ## To start with, just like any other crackme, I downloaded the file using hyperlink and wget command. 
-![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/16.jpg)
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/16.jpg)
 - Then unzipped it to find a file named rev03. Running this file, it asked to enter a magic string, I entered a random string which ended up showing wrong string.
 - Hence, I proceeded with using ghidra. The main function after analysing had the logic for checking if the string entered was correct.
-![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/17.jpg)
+- ![](https://raw.githubusercontent.com/anushka-2201/Game-Hacking-Assets/main/17.jpg)
 - In order to understand the logic mentioned, I had to take help from writeups.
 - The function stores input using fgets(local_98, 100, stdin). Then, it measures the length of the string with strlen. If the string is shorter than 12 bytes (if (sVar1 < 0xc)), it proceeds.
 - From the function it seems like that any string with less than 12 characters and ascii sum equal to 1000 satisfies as a magic string. However, there seems to be a catch in the function logic due to input taken using fgets function, which automatically adds next line character (\n) if there is room.
