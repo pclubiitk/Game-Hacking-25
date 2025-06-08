@@ -411,4 +411,126 @@ void __thiscall password::password(password *this)
 }
 ```
 It basically it passes out `0x42` + `x_.1:.-8.4.p6-e.!-`  to the main function. Where it is stored in the `local_88` variable.  
-Then the main funtion checks the length of the input by passing it to the checkLength function.
+Then the main funtion checks the length of the input by passing it to the checkLength function. Can't get the logic very nicely by seeing the decompiled code so opened GDB for dynamically analysing the memory.
+
+Disassembled main. 
+```
+0x00005555555563b5 <+80>:	mov    edx,eax
+   0x00005555555563b7 <+82>:	lea    rax,[rbp-0x80]
+   0x00005555555563bb <+86>:	mov    esi,edx
+   0x00005555555563bd <+88>:	mov    rdi,rax
+   0x00005555555563c0 <+91>:	call   0x555555556570 <_ZN8password11checkLengthEi>
+   0x00005555555563c5 <+96>:	xor    eax,0x1
+   0x00005555555563c8 <+99>:	test   al,al
+   0x00005555555563ca <+101>:	je     0x5555555563df <main+122>
+   0x00005555555563cc <+103>:	lea    rax,[rbp-0x80]
+```
+Breakpoint at checkLength function:
+```
+gef➤  b *0x555555556570
+Breakpoint 1 at 0x555555556570
+```
+Continued and entered a value. Then disassembled the checkLength funtion:
+```
+gef➤  disass 0x555555556570
+Dump of assembler code for function _ZN8password11checkLengthEi:
+=> 0x0000555555556570 <+0>:	push   rbp
+   0x0000555555556571 <+1>:	mov    rbp,rsp
+   0x0000555555556574 <+4>:	push   rbx
+   0x0000555555556575 <+5>:	sub    rsp,0x48
+   0x0000555555556579 <+9>:	mov    QWORD PTR [rbp-0x48],rdi
+   0x000055555555657d <+13>:	mov    DWORD PTR [rbp-0x4c],esi
+```
+Saw this cmp instruction:
+```
+  0x00005555555565dc <+108>:	mov    DWORD PTR [rax],edx
+   0x00005555555565de <+110>:	mov    rax,QWORD PTR [rbp-0x48]
+   0x00005555555565e2 <+114>:	mov    eax,DWORD PTR [rax]
+   0x00005555555565e4 <+116>:	cmp    DWORD PTR [rbp-0x4c],eax
+   0x00005555555565e7 <+119>:	sete   bl
+   0x00005555555565ea <+122>:	lea    rax,[rbp-0x40]
+   0x00005555555565ee <+126>:	mov    rdi,rax
+```
+Put a breakpoint at ```0x00005555555565e4```
+```
+gef➤  x $eax
+0x7:	Cannot access memory at address 0x7
+gef➤  i r
+rax            0x7                 0x7
+rbx            0x7fffffffde98      0x7fffffffde98
+rcx            0x7fffffffdca1      0x7fffffffdca1
+rdx            0x7                 0x7
+```
+So, the checkLenght is comparing to `7`, the length of the password/.
+
+Now, back to ghidra. Then the main function calls the `checkPassword` for checking the password.
+```
+undefined4 __thiscall password::checkPassword(password *this,ulong param_2)
+
+{
+  password *ppVar1;
+  int iVar2;
+  char *pcVar3;
+  undefined4 uVar4;
+  ulong uVar5;
+  byte *pbVar6;
+  ulong uVar7;
+  long alStack_c0 [4];
+  password *local_a0;
+  string local_98 [32];
+  string local_78 [47];
+  allocator local_49;
+  long local_48;
+  char *local_40;
+  long local_38;
+  int local_2c;
+  
+  alStack_c0[0] = 0x10264e;
+  alStack_c0[3] = param_2;
+  local_a0 = this;
+  std::__cxx11::string::string(local_78);
+  local_2c = 0;
+  while( true ) {
+    uVar7 = (ulong)local_2c;
+    alStack_c0[0] = 0x10266a;
+    uVar5 = std::__cxx11::string::length();
+    if (uVar5 <= uVar7) break;
+                    /* try { // try from 00102687 to 00102748 has its CatchHandler @ 001027d9 */
+    alStack_c0[0] = 0x10268c;
+    pbVar6 = (byte *)std::__cxx11::string::at(alStack_c0[3]);
+    alStack_c0[0] = 0x1026ad;
+    std::__cxx11::string::operator+=(local_78,(byte)local_a0[4] ^ *pbVar6);
+    local_2c = local_2c + 1;
+  }
+  alStack_c0[1] = (long)(*(int *)local_a0 + 1);
+  local_38 = alStack_c0[1] + -1;
+  alStack_c0[2] = 0;
+  uVar5 = (alStack_c0[1] + 0xfU) / 0x10;
+  local_40 = (char *)(alStack_c0 + uVar5 * 0xfffffffffffffffe + 1);
+  ppVar1 = local_a0 + 8;
+  iVar2 = *(int *)local_a0;
+  alStack_c0[uVar5 * -2] = 0x102749;
+  local_48 = std::__cxx11::string::copy
+                       ((char *)ppVar1,(ulong)(alStack_c0 + uVar5 * 0xfffffffffffffffe + 1),
+                        (long)iVar2);
+  local_40[local_48] = '\0';
+  alStack_c0[uVar5 * -2] = 0x102767;
+  std::allocator<char>::allocator();
+  pcVar3 = local_40;
+                    /* try { // try from 0010277c to 00102780 has its CatchHandler @ 001027c8 */
+  alStack_c0[uVar5 * -2] = 0x102781;
+  std::__cxx11::string::string(local_98,pcVar3,&local_49);
+  alStack_c0[uVar5 * -2] = 0x10278d;
+  std::allocator<char>::~allocator((allocator<char> *)&local_49);
+  alStack_c0[uVar5 * -2] = 0x1027a3;
+  uVar4 = std::operator==(local_78,local_98);
+  alStack_c0[uVar5 * -2] = 0x1027b5;
+  std::__cxx11::string::~string(local_98);
+  alStack_c0[uVar5 * -2] = 0x1027c1;
+  std::__cxx11::string::~string(local_78);
+  return uVar4;
+}
+```
+After some analysis get to know the function is first xoring our input with `0x42`. Then compares it to a part of the string made at the `password` function. Wasn't able to get exactly what 7 characters were compared against. So, used ChatGpt to find it which gave `.-8.4.p`. Made a pyhthon file to get the password which is `lozlvl2`.
+
+---
