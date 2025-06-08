@@ -346,3 +346,69 @@ flag is flag{!#&*/5<DMW}
 
 **Flag:** flag{!#&*/5<DMW}
 ---
+## Loz's Password Login 2
+```
+$ ./main
+dfa
+Login failed
+```
+So, we have to enter something and the program validates login.  
+Opened the file in ghidra.  
+The main function:
+```
+
+undefined8 main(void)
+
+{
+  char cVar1;
+  int iVar2;
+  password local_88 [48];
+  string local_58 [32];
+  string local_38 [40];
+  
+  std::__cxx11::string::string(local_58);
+                    /* try { // try from 00102398 to 0010239c has its CatchHandler @ 00102472 */
+  std::getline<>((istream *)std::cin,local_58);
+  password::password(local_88);
+  iVar2 = std::__cxx11::string::length();
+                    /* try { // try from 001023c0 to 001023f1 has its CatchHandler @ 00102461 */
+  cVar1 = password::checkLength(local_88,iVar2);
+  if (cVar1 == '\x01') {
+    std::__cxx11::string::string(local_38,local_58);
+                    /* try { // try from 00102400 to 00102422 has its CatchHandler @ 00102450 */
+    cVar1 = password::checkPassword(local_88,local_38);
+    if (cVar1 == '\0') {
+      password::wrongPassword();
+    }
+    else {
+      password::rightPassword();
+    }
+    std::__cxx11::string::~string(local_38);
+  }
+  else {
+    password::wrongPassword();
+  }
+  password::~password(local_88);
+  std::__cxx11::string::~string(local_58);
+  return 0;
+}
+```
+We have a c++ program, we are asked for input. We have `password`, `checkLength`, `checkPassword` classes.  
+  
+The password class:
+```
+void __thiscall password::password(password *this)
+
+{
+  allocator local_19 [9];
+  
+  this[4] = (password)0x42;
+  std::allocator<char>::allocator();
+                    /* try { // try from 001028aa to 001028ae has its CatchHandler @ 001028bd */
+  std::__cxx11::string::string((string *)(this + 8),"x_.1:.-8.4.p6-e.!-",local_19);
+  std::allocator<char>::~allocator((allocator<char> *)local_19);
+  return;
+}
+```
+It basically it passes out `0x42` + `x_.1:.-8.4.p6-e.!-`  to the main function. Where it is stored in the `local_88` variable.  
+Then the main funtion checks the length of the input by passing it to the checkLength function.
