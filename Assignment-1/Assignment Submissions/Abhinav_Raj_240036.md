@@ -534,3 +534,110 @@ undefined4 __thiscall password::checkPassword(password *this,ulong param_2)
 After some analysis get to know the function is first xoring our input with `0x42`. Then compares it to a part of the string made at the `password` function. Wasn't able to get exactly what 7 characters were compared against. So, used ChatGpt to find it which gave `.-8.4.p`. Made a pyhthon file to get the password which is `lozlvl2`.
 
 ---
+## Silva97's login-cipher:
+Run the file:
+```
+$ ./login
+Don't patch it!
+Insert your password: dfds
+Wrong!
+```
+Opened Ghidra. There is no main function. Looking the different function, mostly were empty. Got two different funtions with some code. One had some strings in it and other be some code logic to print/use the strings.
+
+
+```
+undefined8 FUN_001012a1(void)
+
+{
+  int iVar1;
+  long in_FS_OFFSET;
+  undefined1 local_58 [72];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  FUN_00101348("Gtu.}\'uj{fq!p{$",1);
+  FUN_00101348(&DAT_00102014,0);
+  __isoc99_scanf("%64[^\n]",local_58);
+  iVar1 = FUN_001013e3(local_58,"fhz4yhx|~g=5");
+  if (iVar1 == 0) {
+    FUN_00101348("Ftyynjy*",1);
+  }
+  else {
+    FUN_00101348("Zwvup(",1);
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+It calls this function:
+```
+void FUN_00101348(char *param_1,char param_2)
+
+{
+  long in_FS_OFFSET;
+  char local_118 [264];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  strcpy(local_118,param_1);
+  FUN_00101218(local_118);
+  if (param_2 == '\0') {
+    fputs(local_118,stdout);
+  }
+  else {
+    puts(local_118);
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return;
+}
+```
+And this calls the next one which has the code logic:
+```
+char * FUN_00101218(char *param_1)
+
+{
+  int local_14;
+  char *local_10;
+  
+  local_14 = 0x7b1;
+  for (local_10 = param_1; *local_10 != '\0'; local_10 = local_10 + 1) {
+    local_14 = (local_14 * 7) % 0x10000;
+    *local_10 = *local_10 + ((char)(local_14 / 10) * '\n' - (char)local_14);
+  }
+  return param_1;
+}
+```
+
+Made a c code to check the above function:
+```
+#include<stdio.h>
+int main(){
+	char str[] = "Gtu.}\'uj{fq!p{$";
+	int c = 0x7b1;
+	//char *ptr = sus_string;
+	for (int i=0; str[i] != '\0'; i++) {
+		c = (c * 7) % 0x10000;
+		str[i] = str[i] + ((char)(c / 10) * '\n' - (char)c);
+	}
+	printf("%s",str);
+}
+```
+When run:
+```
+$ ./logincrack 
+Don't patch it!
+```
+Which was the sentence the file prints when run. So `fhz4yhx|~g=5` must be the password string as it is compared to print `Correct` in the 1st function. Used the string in the c code to get the password: ```ccs-passwd44```  
+```
+$ ./login
+Don't patch it!
+Insert your password: ccs-passwd44
+Correct!
+```
+Bingo!
