@@ -29,6 +29,9 @@ So I copied the code, and printed out the local_1c value everytime according to 
 flag is flag{!#&*/5<DMW}
 
 ### Password Login 2
+This is the comparison for the length of the flag in `checklength` fxn. eax contains the user input and the other address should contain the correct length. use gdb.
+![image](https://github.com/user-attachments/assets/6e635e36-988a-40b0-8f19-78048b0516ec)
+
 
 ### login-cipher
 analysing in ghidra, there were mainly 4 imp functions. What was happening was there are a bunch of encrypted string literals inside the binary and these were being decrypted to output the msgs. <br>
