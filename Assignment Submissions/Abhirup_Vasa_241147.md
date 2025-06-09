@@ -1,6 +1,6 @@
-# GDB\
+# GDB
 ## GDB baby step 1
-+ To find the contents of the eax register at the end of main function\
++ To find the contents of the eax register at the end of main function
   - First step was to obviously download the ELF file
   - Use the ***gdb*** command to use the debugger
   - Use the ***disas main*** command to unpack the assembly of the main
@@ -9,7 +9,7 @@
   - The flag is ***picoCTF{549698}***
 
 ## GDB baby step 2
-+ To find the contents of the eax register at the end of main function\
++ To find the contents of the eax register at the end of main function
   - Same first three steps as the GDB baby step 1
     ![disas main](https://github.com/user-attachments/assets/740f1c31-6dcb-4564-b50b-41f79a469a1c)
   - Here there is a loop made using the kind of while condition **while(%eax < -0xc(%rbp) = 607)**
@@ -21,7 +21,7 @@
   - The flag is ***picoCTF{307019}***
 
 ## GDB baby step 3
-+ To find the 4 bytes of memory as they are stored at the address where 0x2262c96b is loaded into memory in the main function\
++ To find the 4 bytes of memory as they are stored at the address where 0x2262c96b is loaded into memory in the main function
   - Same first three steps as the GDB baby step 1
     ![disas main](https://github.com/user-attachments/assets/a9644fbd-634d-47de-ad88-f8e5350ce8a7)
   - Now set a break point at the address after which the 0x2262c96b is loaded into memory
