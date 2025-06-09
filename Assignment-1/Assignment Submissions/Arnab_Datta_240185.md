@@ -198,7 +198,7 @@ Breakpoint 1, 0x0000000000401124 in main ()
 
 ## Reversing - Crackmes
 
-### 1. <https://crackmes.one/crackme/5da31ebc33c5d46f00e2c661>
+### 1. [First](https://crackmes.one/crackme/5da31ebc33c5d46f00e2c661)
 The binary is unzipped with the passcode `crackmes.one`. The file `keyg3nme` is made executable and run. 
 
 (base) arnab@arnab-LOQ-15AHP9:~/Downloads/5da31ebc33c5d46f00e2c661$ chmod +x keyg3nmme
@@ -244,7 +244,7 @@ The `validate_key(...)` method is of particular interest, we navigate to it on g
 We can see from the decompiled validate_key(int ) that it checks whether a number is divisible by (0x4c7)<sub>16</sub>=(1223)<sub>10</sub>.
 Hence any number divisible by 1223 is a valid key. (eg. 0,1223,2446, etc. )
 
-### 2. <https://crackmes.one/crackme/5c1a939633c5d41e58e005d1>
+### [Second](https://crackmes.one/crackme/5c1a939633c5d41e58e005d1)
 The binary is unzipped with the passcode `crackmes.one`. The file `rev03` is made executable and run. 
 
 (base) arnab@arnab-LOQ-15AHP9:~/Downloads/5c1a939633c5d41e58e005d1$ chmod +x rev03
@@ -375,7 +375,7 @@ flag is flag{!#&*/5<DMW}
 ```
 #### Hence the flag is flag{!#&*/5<DMW}
 
-### 3. <https://crackmes.one/crackme/5ca0b6c833c5d4419da5567b>
+### [Third](https://crackmes.one/crackme/5ca0b6c833c5d4419da5567b)
 The binary is unzipped with the passcode `crackmes.one`. The file `main` is made executable and run. 
 
 ```bash
@@ -448,29 +448,216 @@ ulong __thiscall password::checkLength(password *this,int len)
 
                     /* try { // try from 001025a4 to 001025c0 has its CatchHandler @ 001025fa */
   ptr = (char *)std::__cxx11::string::at((ulong)str);
-  //Gets a pointer to the first character of the string "360", i.e., the character '3'
+  //Gets a pointer to the some character of the string "360"
+  //from the assembly code we see that 1 is stored in esi
+  //hence second character i.e. "6" is stored
   ch = *ptr;
   std::__cxx11::string::operator=((string *)str,ch);
-  //Replaces the entire string with "3" by assigning the single character '3'
+  //Replaces the entire string with "6" by assigning the single character '3'
   ptr = (char *)std::__cxx11::string::c_str();
-  //Gets a pointer to the null-terminated string "3".
-  k = atoi(ptr); //k=3
+  //Gets a pointer to the null-terminated string "6".
+  k = atoi(ptr); //k=6
   *(int *)this = k + 1; 
-  k = *(int *)this; //k stores 4
+  k = *(int *)this; //k stores 7
   std::__cxx11::string::~string((string *)str);
   return CONCAT71((int7)((ulong)unaff_RBX >> 8),len == k) & 0xffffffff;
 }
 ```
-checkLength function checks if length of the password is 4 (7??)
+![](https://res.cloudinary.com/dwmy4l7ok/image/upload/v1749414520/Screenshot_from_2025-06-09_01-57-40_ytthhi.png)
+
+eax stores 7 (length of valid password), and $rsp-0x4c points to the length of input string
+![](https://res.cloudinary.com/dwmy4l7ok/image/upload/Screenshot_from_2025-06-09_02-01-30_dimhjt.png)
+
+checkLength function checks if length of the password is 7 (verified using gdb)
+
+
+The password constructor:
+```cpp
+/* password::password() */
+
+void __thiscall password::password(password *this)
+
+{
+  allocator local_19 [9];
+  
+  this[4] = (password)0x42;
+  std::allocator<char>::allocator();
+                    /* try { // try from 001028aa to 001028ae has its CatchHandler @ 001028bd */
+  std::__cxx11::string::string((string *)(this + 8),"x_.1:.-8.4.p6-e.!-",local_19);
+  std::allocator<char>::~allocator((allocator<char> *)local_19);
+  return;
+}
+```
+Decompiled `checkPassword()` with ghidra:
+```cpp
+
+/* WARNING: Type propagation algorithm not settling */
+/* password::checkPassword(std::__cxx11::string) */
+
+undefined4 __thiscall password::checkPassword(int *this,ulong input)
+
+{
+  int *piVar1;
+  int iVar2;
+  char *pcVar3;
+  undefined4 flag;
+  ulong len;
+  byte *pbVar4;
+  ulong ui;
+  long ptrarr [4];
+  int *pswdptr;
+  string key [32];
+  string str [47];
+  allocator alloc;
+  long local_48;
+  char *pass;
+  long local_38;
+  int i;
+  
+  ptrarr[0] = 0x10264e;
+  ptrarr[3] = input;
+  pswdptr = this;
+  std::__cxx11::string::string(str);
+  i = 0;
+  while( true ) {
+    ui = (ulong)i;
+    ptrarr[0] = 0x10266a;
+    len = std::__cxx11::string::length();
+    if (len <= ui) break;
+                    /* try { // try from 00102687 to 00102748 has its CatchHandler @ 001027d9 */
+    ptrarr[0] = 0x10268c;
+    pbVar4 = (byte *)std::__cxx11::string::at(ptrarr[3]);
+    ptrarr[0] = 0x1026ad;
+    std::__cxx11::string::operator+=(str,*(byte *)(pswdptr + 1) ^ *pbVar4);
+    i = i + 1;
+  }
+  ptrarr[1] = (long)(*pswdptr + 1);
+  local_38 = ptrarr[1] + -1;
+  ptrarr[2] = 0;
+  len = (ptrarr[1] + 15U) / 16;
+  pass = (char *)(ptrarr + len * 0xfffffffffffffffe + 1);
+  piVar1 = pswdptr + 2;
+  iVar2 = *pswdptr;
+  ptrarr[len * -2] = 0x102749;
+  local_48 = std::__cxx11::string::copy
+                       ((char *)piVar1,(ulong)(ptrarr + len * 0xfffffffffffffffe + 1),(long)iVar2);
+  pass[local_48] = '\0';
+  ptrarr[len * -2] = 0x102767;
+  std::allocator<char>::allocator();
+  pcVar3 = pass;
+                    /* try { // try from 0010277c to 00102780 has its CatchHandler @ 001027c8 */
+  ptrarr[len * -2] = 0x102781;
+  std::__cxx11::string::string(key,pcVar3,&alloc);
+  ptrarr[len * -2] = 0x10278d;
+  std::allocator<char>::~allocator((allocator<char> *)&alloc);
+  ptrarr[len * -2] = 0x1027a3;
+  flag = std::operator==(str,key);
+  ptrarr[len * -2] = 0x1027b5;
+  std::__cxx11::string::~string(key);
+  ptrarr[len * -2] = 0x1027c1;
+  std::__cxx11::string::~string(str);
+  return flag;
+}
+```
+The above code seem to unfathomable to scrutinize. 
+Hence binary ninja on [DogBolt](https://www.dogbolt.org) was used to decompile `checkPassword()`:
+```cpp
+uint64_t password::checkPassword(class std::string input @ rdi)
+{
+    int32_t* pswd = input;
+    class std::string str;
+    std::string::string(&str);
+    int32_t i = 0;
+    
+    while (true)
+    {
+        std::string::size_type flag;
+        class std::string* rsi;
+        flag = i < std::string::length(rsi);
+        
+        if (!flag)
+            break;
+        
+        char ch = *std::string::at(rsi, i);
+        std::string::operator+=(&str, pswd[1] ^ ch);
+        // pswd[1] is defined in password constructor i.e. this[4]='B'
+        // the code takes the xor of each character of the string with 'B' and builts a new string
+        i++;
+    }
+    
+    int64_t rax_14 = *pswd ;
+    int64_t var_38 = rax_14;
+    int64_t var_b8 = rax_14 + 1;
+    int64_t var_b0 = 0;
+    void* __s = &var_b8 - COMBINE(0, rax_14 + 0x10) / 0x10 * 0x10;
+    //set address to store the key string (char array)
+    *(std::string::copy(&pswd[2], __s, *pswd, 5) + __s) = 0;
+    // &pswd[2] points to "x_.1:.-8.4.p6-e.!-"
+    class std::allocator<char> var_49;
+    std::allocator<char>::allocator(&var_49);
+    class std::string var_98;
+    std::string::string(&var_98, __s);
+    //char array -> std::string, 
+    //var_98 points to string ".-8.4.p6"
+    std::allocator<char>::~allocator(&var_49);
+    int32_t ans = _ZSteqIcEN9__gnu_cxx11__enable_ifIXsrSt9__is_charIT_E7__valueEbE6__typeERKNSt7__cxx1112basic_stringIS3_St11char_traitsIS3_ESaIS3_EEESE_(&str, &var_98); // compare 
+    std::string::~string(&var_98);
+    std::string::~string(&str);
+    return ans;
+}
+```
+Hence after checking length is 7, it checks the password, applying a xor operation with each user input character with 'B' and then comparing with it ".-8.4.p". 
+I have verified this on gdb for input string 1234567
+![](https://res.cloudinary.com/dwmy4l7ok/image/upload/Screenshot_from_2025-06-10_01-14-32_ba6qv9.png)
+If a^b=c then c^b=a. Using this script we get password = `lozlvl2`
+
+```python
+user_input = ".-8.4.p"
+decrypted = ""
+
+for x in user_input:
+    decrypted += chr(ord(x) ^ ord('B'))
+
+print (decrypted)
+```
+
+```bash
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5ca0b6c833c5d4419da5567b$ ./main
+lozlvl2
+Login successful
+```
+#### password = `lozlvl2`
+
+### 4. [Fourth](https://crackmes.one/crackme/5db0ef9f33c5d46f00e2c729)
+The binary is unzipped with the passcode `crackmes.one`. The file `login` is made executable and run. 
+
+```bash
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ chmod +x login
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ ./login 
+Don't patch it!
+Insert your password: 678967
+Wrong!
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ file login
+login: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=49fdc1eeb5c801e572b1ed116e8d7de738bc5907, for GNU/Linux 3.2.0, stripped
+```
+
+Since its a stripped binary, gdb cannot be used.
 
 
 
 
 
-### 4. <https://crackmes.one/crackme/5db0ef9f33c5d46f00e2c729>
+### 5. [Fifth](https://crackmes.one/crackme/5d8dfa7433c5d46f00e2c544)
 
-
-### 5. <https://crackmes.one/crackme/5d8dfa7433c5d46f00e2c544>
-
+The goal to cause buffer overflow to change to $ebp to point to the address of __s_func() function. The input is stored on the stack at $ebp-0x28. 
+The address of __s_func() is 0x8049182. We see that overflow to $ebp happen after 44 characters of input. Hence '\x82\x91\x04\x08' (little endian format) is appended to random 44 characters to call the function.
+```bash
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5d8dfa7433c5d46f00e2c544$ python3 -c "import sys; sys.stdout.buffer.write(b'A'*44 + b'\x82\x91\x04\x08')" | ./crackme
+enter the password:Great !!
+Segmentation fault (core dumped)
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5d8dfa7433c5d46f00e2c544$ printf 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x82\x91\x04\x08' |./crackme
+enter the password:Great !!
+Segmentation fault (core dumped)
+```
 
 
