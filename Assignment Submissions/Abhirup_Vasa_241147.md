@@ -1,4 +1,4 @@
-#GDB
+#GDB\
 ##GDB baby step 1
 + To find the contents of the eax register at the end of main function\
   - First step was to obviously download the ELF file
