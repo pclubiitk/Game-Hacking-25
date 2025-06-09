@@ -37,3 +37,6 @@
   - Now use the command ***disas func1***
     ![disas func1](https://github.com/user-attachments/assets/8af83dfe-ca39-4624-a9c7-a50f17625eb7)
   - The flag is picoCTF{12905}
+
+# Reversing Crackmes
+## [Ezman's easy keyg3nme](https://crackmes.one/crackme/5da31ebc33c5d46f00e2c661)
