@@ -54,7 +54,7 @@
   ![validate_key](https://github.com/user-attachments/assets/a70c52c8-47f6-4270-9dd5-0b6a679fce18)
 + So any multiple of 1223 including 0 must do the work
 
-##[Cbm-hacker's jumpjumpjump](https://crackmes.one/crackme/5c1a939633c5d41e58e005d1)
+## [Cbm-hacker's jumpjumpjump](https://crackmes.one/crackme/5c1a939633c5d41e58e005d1)
 + After extracting the zip file you will find a file named "rev03" (Password : crackmes.one)
 + Using the ***file rev03*** command on "keyg3nme" we find that it is a unstripped ELF file
   ![file](https://github.com/user-attachments/assets/c3171dbe-921a-43d8-aa02-af975389ca3d)
