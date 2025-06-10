@@ -123,4 +123,97 @@ Above was done with the python file, xor_decoding.py.
 But, the above does not seem to be the password. 
 
 # Task 4 : Silva97's login-cipher
+Using ghidra on the binary file, under the section functions, the following is observed:
+
+![All text](images/image15.png)
+
+Opening the function, 'entry' shows the use of _libc_start_main() which is the entry point of a program and is called before the main() function runs.
+
+Exact code is : *  __libc_start_main(FUN_001012a1,param_2,&stack0x00000008,FUN_00101460,FUN_001014c0,param_1,auStack_8);*
+
+Hence, from the code, FUN_001012a1 is the main() function.
+Opening FUN_001012a1:
+
+![All text](images/image16.png)
+
+A stack buffer (local_58) and stack canary (local_10) is initialized. Stack canary is defined.
+On the next line is the use of another function, FUN_00101348(). 
+
+FUN_00101348:
+
+![All text](images/image17.png)
+
+Another buffer is initialized and canary is checked to see if it is modified or not to prevent buffer overflow. The parameter is copyed to the buffer and is run through another function, FUN_00101218().
+
+FUN_00101218:
+
+![All text](images/image18.png)
+
+This seems to be a kind of decoding. A similar program is written in python (task4_python1.py) to check what output this function gives on the strings it is used on.
+
+First: 
+
+![all text](images/image19.png)
+
+This is the text we observe on running the binary file. 
+Similarly, we run other strings which are passed through the function.
+
+![all text](images/image20.png)
+
+Therefore, if iVarl is 0, we get the message 'Correct!'.
+
+iVarl = FUN_001013e3(local_58,"fhz4yhx|~g=5");
+Another function, and the password is most likely to be the encoded version of the string 'fhz4yhx|~g=5'
+
+FUN_001013e3:
+
+![all text](images/image21.png)
+
+This function returns uVar3, which is 0 when local_c = 0 and local_20 comes to the character '\0'.
+
+There is use of another function, FUN_00101175().
+
+FUN_00101175 : 
+
+![all text](images/image22.png)
+
+This is similar to the function FUN_00101218(). Hence, we run the above python program on the string which was passed as the password:
+
+![all text](images/image23.png)
+
+We check if this is the password:
+
+![all text](images/image24.png)
+
+
+# Task 5: math__0x0's iso_32
+
+Classic case of *buffer overflow exploitation*.
+Above can be inferred from observing the main function in ghidra.
+It only shows the function to scan the password, with a buffer size of 36 bytes and directly the failure printing function.
+
+To observe where static over flow is observed, we run gdb for dynamic analysis. If we enter a password too long, we get a segmentation error. To over ride this segmentation fault and get our 'success' function, we need to know the offset in the password where the seg fault occurs.
+For this, we use the pwntools library.
+
+![all text](images/image25.png)
+
+This shows that we get the seg fault in the address 0x616c6161.
+Further, running this code gives us the offset:
+*python3 -c "import pwn; print(pwn.cyclic_find(0x6161616c))"*
+
+Offset : 44.
+
+We can also find the address of the function we want to over ride, that is the __s_func, or the so called success function, using gdb by disassembling the function.
+
+Address comes out to be : 0x08049182.
+
+Now, we exploit the overflow:
+![alt text](images/image26.png)
+
+But, this does not give us the success message. 
+
+Reason being the address is not passed as raw binary, and instead as a string. 
+This can be prevented by passing the little endian version of the address.
+
+![all text](images/image27.png)
 
