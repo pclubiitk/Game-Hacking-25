@@ -639,25 +639,414 @@ Insert your password: 678967
 Wrong!
 (base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ file login
 login: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=49fdc1eeb5c801e572b1ed116e8d7de738bc5907, for GNU/Linux 3.2.0, stripped
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ strings login 
+/lib64/ld-linux-x86-64.so.2
+libc.so.6
+strcpy
+__isoc99_scanf
+__stack_chk_fail
+stdout
+fputs
+__cxa_finalize
+__libc_start_main
+GLIBC_2.7
+GLIBC_2.4
+GLIBC_2.2.5
+_ITM_deregisterTMCloneTable
+__gmon_start__
+_ITM_registerTMCloneTable
+u/UH
+gfff
+gfff
+[]A\A]A^A_
+Gtu.}'uj{fq!p{$
+Lszl{{%
+vx{!whvt|twg?%
+%64[^
+fhz4yhx|~g=5
+Ftyynjy*
+Zwvup(
+;*3$"
+GCC: (Ubuntu 8.3.0-6ubuntu1) 8.3.0
+.shstrtab
+.interp
+.note.gnu.build-id
+.note.ABI-tag
+.gnu.hash
+.dynsym
+.dynstr
+.gnu.version
+.gnu.version_r
+.rela.dyn
+.rela.plt
+.init
+.plt.got
+.text
+.fini
+.rodata
+.eh_frame_hdr
+.eh_frame
+.init_array
+.fini_array
+.dynamic
+.data
+.bss
+.comment
+
+```
+The strings "Don't patch it!","Insert your password:","Wrong!" are not stored directly, but in some encrypted format as in 
+```
+Gtu.}'uj{fq!p{$
+Lszl{{%
+vx{!whvt|twg?%
+%64[^
+fhz4yhx|~g=5
+Ftyynjy*
+Zwvup(
 ```
 
-Since its a stripped binary, gdb cannot be used.
+Since its a stripped binary, gdb cannot be used. Hence its loaded up on ghidra.
+Its functions are inspected. main() function is not found.
+
+![](https://res.cloudinary.com/dwmy4l7ok/image/upload/Screenshot_from_2025-06-11_13-19-49_dfpk9d.png)
+
+Let inspect the function entry()
+```c
+
+void processEntry entry(undefined8 param_1,undefined8 param_2)
+
+{
+  undefined1 auStack_8 [8];
+  
+  __libc_start_main(FUN_001012a1,param_2,&stack0x00000008,FUN_00101460,FUN_001014c0,param_1,
+                    auStack_8);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+```
+Next, inspect the function FUN_001012a1()
+
+```c
+
+undefined8 FUN_001012a1(void)
+
+{
+  int iVar1;
+  long in_FS_OFFSET;
+  undefined1 local_58 [72];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  FUN_00101348("Gtu.}\'uj{fq!p{$",1);
+  FUN_00101348(&DAT_00102014,0);
+  __isoc99_scanf("%64[^\n]",local_58);
+  iVar1 = FUN_001013e3(local_58,"fhz4yhx|~g=5");
+  if (iVar1 == 0) {
+    FUN_00101348("Ftyynjy*",1);
+  }
+  else {
+    FUN_00101348("Zwvup(",1);
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+The above function looks a lot like the main function.
 
 
+Next, lets see function FUN_00101348()
+```c
 
+void FUN_00101348(char *param_1,char param_2)
+
+{
+  long in_FS_OFFSET;
+  char local_118 [264];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  strcpy(local_118,param_1);
+  FUN_00101218(local_118);
+  if (param_2 == '\0') {
+    fputs(local_118,stdout);
+  }
+  else {
+    puts(local_118);
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return;
+}
+```
+This functions employs FUN_00101218() to decrypt a string and print it using fputs(if param_2 is 0) or puts(if param_2 is 1, appends '\n' ).
+The much required analysis of FUN_00101218():
+```c
+
+char * FUN_00101218(char *param_1)
+
+{
+  int local_14;
+  char *local_10;
+  
+  local_14 = 1969;
+  for (local_10 = param_1; *local_10 != '\0'; local_10 = local_10 + 1) {
+    local_14 = (local_14 * 7) % 65536;
+    *local_10 = *local_10 + ((char)(local_14 / 10) * (char)10 - (char)local_14);
+  }
+  return param_1;
+}
+```
+Let's see how it decrypts the words
+```c
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+
+    char i = 'u';
+    char j = 'A';
+    int local_14 = 1969;
+    char str[] = "Gtu.}\'uj{fq!p{$";
+    for (int i = 0; i < strlen(str); i++)
+    {
+
+        local_14 = (local_14 * 7) % 65536;
+        str[i] = str[i] + ((char)(local_14 / 10) * (char)10 - (char)local_14);
+        printf("%c", str[i]);
+    }
+}
+output:Don't patch it!
+```
+
+We observe that FUN_001013e3() and FUN_00101175() is used for validation:
+```c
+
+undefined8 FUN_001013e3(char *param_1,undefined8 param_2)
+{
+  char *pcVar1;
+  char cVar2;
+  undefined8 uVar3;
+  char *local_20;
+  int local_c;
+  
+  local_c = FUN_00101175(param_2);
+  local_20 = param_1;
+  while ((*local_20 != '\0' && (local_c != 0))) {
+    pcVar1 = local_20 + 1;
+    cVar2 = *local_20;
+    local_20 = pcVar1;
+    if (local_c != cVar2) break;
+    local_c = FUN_00101175(0);
+  }
+  if ((local_c == 0) && (*local_20 == '\0')) {
+    uVar3 = 0;
+  }
+  else {
+    uVar3 = 1;
+  }
+  return uVar3;
+}
+
+
+int FUN_00101175(char *param_1)
+{
+  int iVar1;
+  
+  if (param_1 != (char *)0x0) {
+    DAT_00104010 = 1969;
+    DAT_00104028 = param_1;
+  }
+  if (*DAT_00104028 == '\0') {
+    iVar1 = 0;
+  }
+  else {
+    DAT_00104010 = (DAT_00104010 * 7) % 65536;
+    iVar1 = (int)*DAT_00104028 + ((DAT_00104010 / 10) * 10 - DAT_00104010);
+    DAT_00104028 = DAT_00104028 + 1;
+  }
+  return iVar1;
+}
+```
+
+The above methods effectively check if input matches the decrypted form of "fhz4yhx|~g=5" by maintaining static variables.
+
+```c
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+
+    char i = 'u';
+    char j = 'A';
+    int local_14 = 1969;
+    char str[] = "fhz4yhx|~g=5";
+    for (int i = 0; i < strlen(str); i++)
+    {
+
+        local_14 = (local_14 * 7) % 65536;
+        str[i] = str[i] + ((char)(local_14 / 10) * (char)10 - (char)local_14);
+        printf("%c", str[i]);
+    }
+}
+output:ccs-passwd44
+```
+```bash
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5db0ef9f33c5d46f00e2c729$ ./login 
+Don't patch it!
+Insert your password: ccs-passwd44
+Correct!
+```
+
+#### Hence the password is `ccs-passwd44`
 
 
 ### 5. [Fifth](https://crackmes.one/crackme/5d8dfa7433c5d46f00e2c544)
 
-The goal to cause buffer overflow to change to $ebp to point to the address of __s_func() function. The input is stored on the stack at $ebp-0x28. 
-The address of __s_func() is 0x8049182. We see that overflow to $ebp happen after 44 characters of input. Hence '\x82\x91\x04\x08' (little endian format) is appended to random 44 characters to call the function.
+
+
+```bash
+(gdb) info functions
+All defined functions:
+
+Non-debugging symbols:
+0x08049000  _init
+0x08049030  printf@plt
+0x08049040  puts@plt
+0x08049050  __libc_start_main@plt
+0x08049060  __isoc99_scanf@plt
+0x08049070  _start
+0x080490b0  _dl_relocate_static_pie
+0x080490c0  __x86.get_pc_thunk.bx
+0x080490d0  deregister_tm_clones
+0x08049110  register_tm_clones
+0x08049150  __do_global_dtors_aux
+0x08049180  frame_dummy
+0x08049182  __s_func
+0x080491ad  __f_func
+0x080491d8  f
+0x08049218  main
+0x08049239  __x86.get_pc_thunk.ax
+0x08049240  __libc_csu_init
+0x080492a0  __libc_csu_fini
+0x080492a4  _fini
+(gdb) disass main
+Dump of assembler code for function main:
+   0x08049218 <+0>:	push   ebp
+   0x08049219 <+1>:	mov    ebp,esp
+   0x0804921b <+3>:	and    esp,0xfffffff0
+   0x0804921e <+6>:	call   0x8049239 <__x86.get_pc_thunk.ax>
+   0x08049223 <+11>:	add    eax,0x2ddd
+   0x08049228 <+16>:	call   0x80491d8 <f>
+   0x0804922d <+21>:	call   0x80491ad <__f_func>
+   0x08049232 <+26>:	mov    eax,0x0
+   0x08049237 <+31>:	leave  
+   0x08049238 <+32>:	ret    
+End of assembler dump.
+(gdb) disass __f_func
+Dump of assembler code for function __f_func:
+   0x080491ad <+0>:	push   ebp
+   0x080491ae <+1>:	mov    ebp,esp
+   0x080491b0 <+3>:	push   ebx
+   0x080491b1 <+4>:	sub    esp,0x4
+   0x080491b4 <+7>:	call   0x8049239 <__x86.get_pc_thunk.ax>
+   0x080491b9 <+12>:	add    eax,0x2e47
+   0x080491be <+17>:	sub    esp,0xc
+   0x080491c1 <+20>:	lea    edx,[eax-0x1fef]
+   0x080491c7 <+26>:	push   edx
+   0x080491c8 <+27>:	mov    ebx,eax
+   0x080491ca <+29>:	call   0x8049040 <puts@plt>
+   0x080491cf <+34>:	add    esp,0x10
+   0x080491d2 <+37>:	nop
+   0x080491d3 <+38>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x080491d6 <+41>:	leave  
+   0x080491d7 <+42>:	ret    
+End of assembler dump.
+(gdb) disass __s_func
+Dump of assembler code for function __s_func:
+   0x08049182 <+0>:	push   ebp
+   0x08049183 <+1>:	mov    ebp,esp
+   0x08049185 <+3>:	push   ebx
+   0x08049186 <+4>:	sub    esp,0x4
+   0x08049189 <+7>:	call   0x8049239 <__x86.get_pc_thunk.ax>
+   0x0804918e <+12>:	add    eax,0x2e72
+   0x08049193 <+17>:	sub    esp,0xc
+   0x08049196 <+20>:	lea    edx,[eax-0x1ff8]
+   0x0804919c <+26>:	push   edx
+   0x0804919d <+27>:	mov    ebx,eax
+   0x0804919f <+29>:	call   0x8049040 <puts@plt>
+   0x080491a4 <+34>:	add    esp,0x10
+   0x080491a7 <+37>:	nop
+   0x080491a8 <+38>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x080491ab <+41>:	leave  
+   0x080491ac <+42>:	ret    
+End of assembler dump.
+(gdb) disass f
+Dump of assembler code for function f:
+   0x080491d8 <+0>:	push   ebp
+   0x080491d9 <+1>:	mov    ebp,esp
+   0x080491db <+3>:	push   ebx
+   0x080491dc <+4>:	sub    esp,0x24
+   0x080491df <+7>:	call   0x80490c0 <__x86.get_pc_thunk.bx>
+   0x080491e4 <+12>:	add    ebx,0x2e1c
+   0x080491ea <+18>:	sub    esp,0xc
+   0x080491ed <+21>:	lea    eax,[ebx-0x1fde]
+   0x080491f3 <+27>:	push   eax
+   0x080491f4 <+28>:	call   0x8049030 <printf@plt>
+   0x080491f9 <+33>:	add    esp,0x10
+   0x080491fc <+36>:	sub    esp,0x8
+   0x080491ff <+39>:	lea    eax,[ebp-0x28] <= buffer is pasted here 
+   0x08049202 <+42>:	push   eax
+   0x08049203 <+43>:	lea    eax,[ebx-0x1fca]
+   0x08049209 <+49>:	push   eax
+   0x0804920a <+50>:	call   0x8049060 <__isoc99_scanf@plt>
+   0x0804920f <+55>:	add    esp,0x10
+   0x08049212 <+58>:	nop
+   0x08049213 <+59>:	mov    ebx,DWORD PTR [ebp-0x4]
+   0x08049216 <+62>:	leave  
+   0x08049217 <+63>:	ret    
+End of assembler dump.
+```
+We see that the normal flow of the program is that after accepting input in f(), the function `__f_func()` is called next. However to crack it, we need to call `__s_func()`.
+The stack in function f() has the following structure
+
+| Stack Offset / Register     | Value / Description         |   |
+|----------------------------|-----------------------------|---|
+| Return Address             | [Calling function address]  | <=ebp+4  |
+| Saved EBP                  | previous ebp            | <=ebp   |
+| Saved EBX                  | ebx                        |  <=ebp-4|
+| Buffer byte 33-36                 | ...                         |  <=ebp-8 |
+| Buffer byte 29-32                 | ...                         |  <=ebp-12 |
+| Buffer byte 25-28                 | ...                         |  <=ebp-16|
+| Buffer byte 21-24                 | ...                         |  <=ebp-20|
+| Buffer byte 17-20                 | ...                         |  <=ebp-24 |
+| Buffer byte 13-16                  | ...                         | <=ebp-28  |
+| Buffer byte 9-12                   | ...                         |  <=ebp-32 |
+| Buffer byte 5-8                   | ...                         |  <=ebp-36 |
+| Buffer byte 1-4              | ...                         | <=ebp-40  |
+
+
+
+The goal to cause buffer overflow to change to $ebp+4 to point to the address of `__s_func()` function. The input is stored on the stack at $ebp-0x28. To overflow to $ebp+4, we need 44 characters to fill $ebp-40 through $ebp and the characters beyond 44th character, get stored in $ebp+4, which is transfered to $eip after return from function f()
+
+This can we verified using gdb:
+for input aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz,
+$eip contains wwxx after the program crashes.
+![](https://res.cloudinary.com/dwmy4l7ok/image/upload/Screenshot_from_2025-06-11_13-03-57_orghbw.png)
+
+The address of `__s_func() is 0x8049182`. We see that overflow to $ebp happen after 44 characters of input. Hence '\x82\x91\x04\x08' (little endian format) is appended to random 44 characters to call the function.
+
 ```bash
 (base) arnab@arnab-LOQ-15AHP9:~/Downloads/5d8dfa7433c5d46f00e2c544$ python3 -c "import sys; sys.stdout.buffer.write(b'A'*44 + b'\x82\x91\x04\x08')" | ./crackme
 enter the password:Great !!
 Segmentation fault (core dumped)
-(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5d8dfa7433c5d46f00e2c544$ printf 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\x82\x91\x04\x08' |./crackme
+(base) arnab@arnab-LOQ-15AHP9:~/Downloads/5d8dfa7433c5d46f00e2c544$ printf 'aaaaaaaaaaaagameaaapclubaaaaaaahackingaaaaaa\x82\x91\x04\x08' |./crackme
 enter the password:Great !!
 Segmentation fault (core dumped)
 ```
-
-
