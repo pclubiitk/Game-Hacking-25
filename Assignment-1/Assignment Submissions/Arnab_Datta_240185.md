@@ -559,7 +559,7 @@ undefined4 __thiscall password::checkPassword(int *this,ulong input)
   return flag;
 }
 ```
-The above code seem to unfathomable to scrutinize. 
+The above code seems too unfathomable to scrutinize. 
 Hence binary ninja on [DogBolt](https://www.dogbolt.org) was used to decompile `checkPassword()`:
 ```cpp
 uint64_t password::checkPassword(class std::string input @ rdi)
